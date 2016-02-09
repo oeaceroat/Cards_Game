@@ -14,7 +14,7 @@ STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
 class User(models.Model):
 
     name = models.CharField(max_length=100, blank=False)
-    userName = models.CharField(max_length=100, blank=False)
+    userName = models.CharField(max_length=50, unique=True, blank=False)
 
     class Meta:
         ordering = ('name',)

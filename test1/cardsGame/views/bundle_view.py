@@ -4,64 +4,47 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from cardsGame.models.player_model import Player
 from cardsGame.models.bundle_model import Bundle
-from cardsGame.models.user_model import User
-from cardsGame.models.card_model import Card
 
-from cardsGame.serializers.card_serializer import CardSerializer
+from cardsGame.serializers.bundle_serializer import BundleSerializer
 
 
 @csrf_exempt
-def card_list(request):
+def bundle_list(request):
 
     if request.method == 'GET':
-        cards = Card.objects.all()
-        serializer = CardSerializer(cards, many=True)
+        bundles = Bundle.objects.all()
+        serializer = BundleSerializer(bundles, many=True)
         return JSONResponse(serializer.data)
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = CardSerializer(data = data)
+        serializer = BundleSerializer(data = data)
         if serializer.is_valid():
             serializer.save()
             return JSONResponse(serializer.data, status=201)
         return JSONResponse(serializer.errors, status=400)
 
 @csrf_exempt
-def card_detail(request, userName):
+def bundle_detail(request, acc_name):
     try:
-        user = User.objects.filter(userName = userName)
-        player = Player.objects.filter(user = user)
+        player = Player.objects.filter(acc_name=acc_name)
         bundle = Bundle.objects.filter(player = player)
-        card = Card.objects.filter(bundle = bundle)
 
-    except Card.DoesNotExist:
+    except Bundle.DoesNotExist:
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = CardSerializer(card, many=True)
+        serializer = BundleSerializer(bundle, many=True)
         return JSONResponse(serializer.data)
 
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
-        serializer = CardSerializer(card, data=data)
+        serializer = BundleSerializer(bundle, data=data)
         if serializer.is_valid():
             serializer.save()
             return JSONResponse(serializer.data)
         return JSONResponse(serializer.errors, status = 400)
 
     elif request.method == 'DELETE':
-        card.delete()
+        bundle.delete()
         return HttpResponse(status=204)
-
-def cards_count(request, acc_name):
-
-    try:
-        player = Player.objects.get(acc_name=acc_name)
-        bundle = Bundle.objects.filter(player = player)
-        count = Card.objects.filter(bundle = bundle).count()
-
-    except Player.DoesNotExist:
-        return HttpResponse(status=404)
-
-    message = (acc_name, ' have ', count, ' cards ')
-    return HttpResponse(message)
