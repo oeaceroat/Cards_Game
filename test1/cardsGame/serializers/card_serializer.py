@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cardsGame.models import Card,  LANGUAGE_CHOICES, STYLE_CHOICES
+from cardsGame.models.card_model import Card,  LANGUAGE_CHOICES, STYLE_CHOICES
 
 
 class CardSerializer(serializers.ModelSerializer):

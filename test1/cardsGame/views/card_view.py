@@ -2,7 +2,10 @@ from django.http import HttpResponse
 from cardsGame.views.tools import JSONResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
-from cardsGame.models import User, Player, Card
+from cardsGame.models.player_model import Player
+from cardsGame.models.user_model import User
+from cardsGame.models.card_model import Card
+
 from cardsGame.serializers.card_serializer import CardSerializer
 
 
