@@ -1,56 +1,55 @@
 from django.shortcuts import render
-
-# Create your views here.
-
-from django.http import HttpResponse
-from cardsGame.views.tools import JSONResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.renderers import JSONRenderer
+from django.http import HttpResponse, Http404
 from rest_framework.parsers import JSONParser
 from cardsGame.models.user_model import User
 from cardsGame.serializers.user_serializer import UserSerializer
-from rest_framework import serializers
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
 
-@csrf_exempt
-def user_list(request):
+# Create your views here.
+
+class UserList(APIView):
     """
     List all code cardsGame, or create a new user.
     """
-    if request.method == 'GET':
-        cardsGame = User.objects.all()
-        serializer = UserSerializer(cardsGame, many=True)
-        return JSONResponse(serializer.data)
+    def get(self, request, format=None):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response (serializer.data)
 
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = UserSerializer(data=data)
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
-def user_detail(request, userName):
+
+class UserDetail(APIView):
     """
     Retrieve, update or delete a code user.
     """
-    try:
-        user = User.objects.filter(userName=userName)
-    except User.DoesNotExist:
-        return HttpResponse(status=404)
+    def get_object(self, userName):
+        try:
+            user = User.objects.filter(userName=userName)
+        except User.DoesNotExist:
+            raise Http404
 
-    if request.method == 'GET':
-        serializer = UserSerializer(user, many=True)
-        return JSONResponse(serializer.data)
+    def get(self, request, userName, format=None):
+        users = self.get_object(userName)
+        serializer = UserSerializer(users)
+        return Response(serializer.data)
 
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = UserSerializer(user, data=data)
+    def put(self, request, userName, format=None):
+        user = self.get_object(userName)
+        serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
+    def delete(self, request, userName, format=None):
+        user = self.get_object(userName)
         user.delete()
-        return HttpResponse(status=204)
+        return HttpResponse(status=status.HTTP_204_NO_CONTENT)

@@ -5,50 +5,56 @@ from rest_framework.parsers import JSONParser
 from cardsGame.models.user_model import User
 from cardsGame.models.player_model import Player
 from cardsGame.serializers.player_serializer import  PlayerSerializer
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+from django.http import HttpResponse, Http404
 
 
-@csrf_exempt
-def player_list(request):
+class PlayerList(APIView):
     """
     List all code cardsGame, or create a new user.
     """
-    if request.method == 'GET':
-        cardsGame = Player.objects.all()
-        serializer = PlayerSerializer(cardsGame, many=True)
-        return JSONResponse(serializer.data)
+    def get(self, request, format=None):
+        players = Player.objects.all()
+        serializer = PlayerSerializer(players, many=True)
+        return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         data = JSONParser().parse(request)
         serializer = PlayerSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
-def player_detail(request, userName):
+class PlayerDetail(APIView):
     """
     Retrieve, update or delete a code user.
     """
-    try:
-        user_ = User.objects.filter(userName = userName)
-        player = Player.objects.filter(user = user_)
+    def get_object(self, userName):
+        try:
+            user_ = User.objects.filter(userName = userName)
+            player = Player.objects.filter(user = user_)
 
-    except Player.DoesNotExist:
-        return HttpResponse(status=404)
+        except Player.DoesNotExist:
+            raise Http404
 
-    if request.method == 'GET':
-        serializer = PlayerSerializer(player, many=True)
-        return JSONResponse(serializer.data)
+    def get(self, request, userName, format=None):
+        players = self.get_object(userName)
+        serializer = PlayerSerializer(players, many=True)
+        return Response(serializer.data)
 
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = PlayerSerializer(player, data=data)
+    def put(self, request, userName, format=None):
+        player = self.get_object(userName)
+        serializer = PlayerSerializer(player, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUES)
 
-    elif request.method == 'DELETE':
+    def delete(self, request, userName, format=None):
+        player = self.get_object(userName)
         player.delete()
-        return HttpResponse(status=204)
+        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
