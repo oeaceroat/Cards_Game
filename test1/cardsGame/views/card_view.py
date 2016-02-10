@@ -58,7 +58,10 @@ def cards_count(request, acc_name):
     try:
         player = Player.objects.get(acc_name=acc_name)
         bundle = Bundle.objects.filter(player = player)
-        count = Card.objects.filter(bundle = bundle).count()
+
+        count = 0;
+        for i in range(0,len(bundle)):
+            count += Card.objects.filter(bundle = bundle[i]).count()
 
     except Player.DoesNotExist:
         return HttpResponse(status=404)
