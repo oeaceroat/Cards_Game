@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from cardsGame.models.player_model import Player
 from cardsGame.models.bundle_model import Bundle
+from cardsGame.models.concret_model import Concret
 from cardsGame.serializers.bundle_serializer import BundleSerializer
 from rest_framework.response import Response
 from rest_framework import status
@@ -48,3 +49,26 @@ class BundleDetail(APIView):
         bundle = self.get_object(acc_name)
         bundle.delete()
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
+
+def bundle_merge(request, bundle_source_id, bundle_destination_id ):
+
+    try:
+        bundle_source = Bundle.objects.get(id = bundle_source_id)
+        bundle_destination = Bundle.objects.get(id = bundle_destination_id)
+    except Bundle.DoesNotExist:
+        return  HttpResponse(status = 404)
+
+    concret_source = Concret.objects.filter(bundle= bundle_source)
+
+    for i in range(0, len(concret_source)):
+        concret_source[i].bundle = bundle_destination
+        concret_source[i].save()
+
+    bundle_source.delete()
+
+    messagge = 'Merge ok'
+    return HttpResponse(messagge)
+
+
+
