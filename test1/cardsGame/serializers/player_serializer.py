@@ -4,7 +4,7 @@ from cardsGame.models.player_model import Player, LANGUAGE_CHOICES, STYLE_CHOICE
 class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
-        fields = ('user', 'acc_name')
+        fields = ('id', 'user', 'acc_name')
 
     def create(self, validated_data):
         """

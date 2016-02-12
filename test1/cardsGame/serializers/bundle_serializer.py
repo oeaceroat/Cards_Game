@@ -5,7 +5,7 @@ class BundleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bundle
-        fields = ('id','player', 'name')
+        fields = ('id','player', 'name', 'type')
 
     def create(self, validate_data):
         return Bundle.objects.create(**validate_data)
@@ -14,5 +14,6 @@ class BundleSerializer(serializers.ModelSerializer):
 
         instance.player = validate_data.get('player'),
         instance.name = validate_data.get('name')
+        instance.type = validate_data.get('type')
         instance.save()
         return instance

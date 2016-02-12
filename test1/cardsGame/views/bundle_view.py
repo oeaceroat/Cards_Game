@@ -59,6 +59,7 @@ def bundle_merge(request, bundle_source_id, bundle_destination_id ):
     except Bundle.DoesNotExist:
         return  HttpResponse(status = 404)
 
+
     concret_source = Concret.objects.filter(bundle= bundle_source)
 
     for i in range(0, len(concret_source)):
@@ -70,6 +71,57 @@ def bundle_merge(request, bundle_source_id, bundle_destination_id ):
 
     messagge = 'Merge ok'
     return HttpResponse(messagge)
+
+
+def bundle_exchange(request, bundle_player1_id, bundle_player2_id):
+    try:
+        bundle_player1 = Bundle.objects.get(id = bundle_player1_id)
+        bundle_player2 = Bundle.objects.get(id = bundle_player2_id)
+    except Bundle.DoesNotExist:
+        return HttpResponse(status=404)
+
+    aux =  bundle_player1.player
+    bundle_player1.player = bundle_player2.player
+    bundle_player1.save()
+    bundle_player2.player = aux
+    bundle_player2.save()
+
+    messagge = 'Exchange ok'
+    return HttpResponse(messagge)
+
+
+class BundleDivide(APIView):
+
+    def post(self, request, format=None):
+        concret_id_list = request.data.get('concret_id')
+        player_destination_id = request.data.get('player_destination_id')
+        print type(player_destination_id)
+        try:
+            #bundle_source = Bundle.objects.get(id=bundle_source_id)
+            player_destination = Player.objects.get(player_destination_id)
+        except Player.DoesNotExist:
+            return HttpResponse(status=404)
+
+        new_bundle = Bundle(player=player_destination_id, name="new bundle",type=2)
+        new_bundle.save()
+
+        for i in range(0, len(concret_id_list)):
+            concret = Concret.objects.get(id=concret_id_list[i])
+            concret.bundle = new_bundle
+            concret.save()
+
+        messagge = 'Divide ok'
+        return HttpResponse(messagge)
+
+
+
+
+
+
+
+
+
+
 
 
 
