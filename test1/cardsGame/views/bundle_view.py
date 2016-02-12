@@ -62,8 +62,9 @@ def bundle_merge(request, bundle_source_id, bundle_destination_id ):
     concret_source = Concret.objects.filter(bundle= bundle_source)
 
     for i in range(0, len(concret_source)):
-        concret_source[i].bundle = bundle_destination
-        concret_source[i].save()
+        concret = concret_source[i]
+        concret.bundle = bundle_destination
+        concret.save()
 
     bundle_source.delete()
 
