@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from cardsGame.models.card_model import Card,  LANGUAGE_CHOICES, STYLE_CHOICES
+from cardsGame.serializers.concret_serializer import ConcretSerializer
 
 
-class CardSerializer(serializers.ModelSerializer):
+class CardSerializer(ConcretSerializer):
     class Meta:
         model = Card
         fields = ('id', 'bundle', 'image', 'name', 'power')
@@ -12,7 +13,7 @@ class CardSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validate_data):
 
-        instance.bundle = validate_data.get('bundle', instance.player)
+        instance.bundle = validate_data.get('bundle', instance.bundle)
         instance.image = validate_data.get('image', instance.image)
         instance.name = validate_data.get('name', instance.name)
         instance.power = validate_data.get('power', instance.power)
